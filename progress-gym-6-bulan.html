@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tracking Progress Gym 6 Bulan</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+    body { background: #f4f6f8; color: #1f2937; padding: 20px; }
+    .container { max-width: 1100px; margin: auto; }
+    header { background: linear-gradient(135deg, #111827, #374151); color: white; padding: 28px; border-radius: 18px; margin-bottom: 24px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+    header h1 { font-size: 30px; margin-bottom: 8px; }
+    header p { opacity: 0.9; line-height: 1.5; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .card { background: white; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .card h2 { font-size: 20px; margin-bottom: 14px; color: #111827; }
+    .stat { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #e5e7eb; gap: 12px; }
+    .stat:last-child { border-bottom: none; }
+    .stat span:first-child { color: #6b7280; }
+    .stat span:last-child { font-weight: bold; text-align: right; }
+    .form-section { background: white; padding: 22px; border-radius: 16px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .form-section h2 { margin-bottom: 16px; }
+    .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+    label { display: block; font-size: 14px; color: #4b5563; margin-bottom: 6px; }
+    input, select, textarea { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 10px; font-size: 14px; outline: none; }
+    textarea { min-height: 90px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { border-color: #111827; }
+    button { margin-top: 16px; padding: 12px 18px; border: none; border-radius: 12px; background: #111827; color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    button:hover { background: #374151; transform: translateY(-1px); }
+    .danger { background: #dc2626; margin-left: 8px; }
+    .danger:hover { background: #b91c1c; }
+    table { width: 100%; border-collapse: collapse; background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #e5e7eb; font-size: 14px; vertical-align: top; }
+    th { background: #111827; color: white; }
+    tr:hover td { background: #f9fafb; }
+    .badge { display: inline-block; padding: 5px 9px; border-radius: 999px; font-size: 12px; font-weight: bold; background: #e5e7eb; white-space: nowrap; }
+    .good { background: #dcfce7; color: #166534; }
+    .warn { background: #fef3c7; color: #92400e; }
+    .section-title { margin: 24px 0 12px; font-size: 22px; }
+    .progress-bar { width: 100%; height: 12px; background: #e5e7eb; border-radius: 999px; overflow: hidden; margin-top: 10px; }
+    .progress-fill { height: 100%; width: 0%; background: #111827; transition: width 0.3s ease; }
+    .footer-note { margin-top: 20px; color: #6b7280; font-size: 14px; line-height: 1.5; }
+    @media (max-width: 600px) {
+      body { padding: 12px; }
+      header h1 { font-size: 24px; }
+      th, td { font-size: 12px; padding: 9px; }
+      button { width: 100%; }
+      .danger { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Tracking Progress Gym 6 Bulan</h1>
+      <p>Target: badan lebih lean, konsisten gym 3x seminggu, pinggang lebih terkontrol, dan progress beban naik pelan-pelan.</p>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Ringkasan Target</h2>
+        <div class="stat"><span>Durasi</span><span>6 Bulan</span></div>
+        <div class="stat"><span>Gym</span><span>3x / Minggu</span></div>
+        <div class="stat"><span>Target</span><span>Lean</span></div>
+        <div class="stat"><span>Start BB</span><span>65 kg</span></div>
+        <div class="stat"><span>Start Pinggang</span><span>85 cm</span></div>
+      </div>
+
+      <div class="card">
+        <h2>Progress 6 Bulan</h2>
+        <div class="stat"><span>Bulan Terisi</span><span id="monthCount">0 / 6</span></div>
+        <div class="stat"><span>Total Sesi Gym</span><span id="totalGym">0</span></div>
+        <div class="stat"><span>Rata-rata Gym/Minggu</span><span id="avgGym">0x</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+
+      <div class="card">
+        <h2>Reminder</h2>
+        <p style="line-height:1.6; color:#4b5563;">Jangan bandingin badan lo sama orang lain di gym. Bandingin sama versi lo 1 bulan lalu. Foto badan, lingkar pinggang, dan beban latihan itu lebih penting daripada cuma angka timbangan.</p>
+      </div>
+    </div>
+
+    <section class="form-section">
+      <h2>Input Progress Bulanan</h2>
+      <div class="form-grid">
+        <div>
+          <label for="month">Bulan Ke-</label>
+          <select id="month">
+            <option value="1">Bulan 1</option><option value="2">Bulan 2</option><option value="3">Bulan 3</option><option value="4">Bulan 4</option><option value="5">Bulan 5</option><option value="6">Bulan 6</option>
+          </select>
+        </div>
+        <div><label for="weight">Berat Badan (kg)</label><input type="number" id="weight" placeholder="Contoh: 65" step="0.1" /></div>
+        <div><label for="waist">Lingkar Pinggang (cm)</label><input type="number" id="waist" placeholder="Contoh: 85" step="0.1" /></div>
+        <div><label for="gymSessions">Total Gym Bulan Ini</label><input type="number" id="gymSessions" placeholder="Contoh: 12" /></div>
+        <div><label for="cardio">Cardio Bulan Ini</label><input type="number" id="cardio" placeholder="Contoh: 6" /></div>
+        <div><label for="bench">Bench Press / Chest Press (kg)</label><input type="number" id="bench" placeholder="Opsional" step="0.5" /></div>
+        <div><label for="squat">Squat / Leg Press (kg)</label><input type="number" id="squat" placeholder="Opsional" step="0.5" /></div>
+        <div><label for="deadlift">Deadlift / RDL (kg)</label><input type="number" id="deadlift" placeholder="Opsional" step="0.5" /></div>
+      </div>
+
+      <div style="margin-top:14px;">
+        <label for="notes">Catatan Bulanan</label>
+        <textarea id="notes" placeholder="Contoh: bulan ini paha makin gede, pinggang agak naik, beban mulai naik, tidur masih kurang..."></textarea>
+      </div>
+
+      <button onclick="saveProgress()">Simpan Progress</button>
+      <button class="danger" onclick="resetData()">Reset Semua Data</button>
+    </section>
+
+    <h2 class="section-title">Tabel Progress</h2>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Bulan</th><th>BB</th><th>Pinggang</th><th>Gym</th><th>Cardio</th><th>Chest</th><th>Leg</th><th>RDL</th><th>Status</th><th>Catatan</th>
+          </tr>
+        </thead>
+        <tbody id="progressTable"></tbody>
+      </table>
+    </div>
+
+    <p class="footer-note">Tips: ukur pinggang pagi hari setelah bangun dan setelah buang air. Foto badan sebulan sekali dari depan, samping, dan belakang. Untuk target lean, progress bagus itu bukan cuma berat naik, tapi badan lebih proporsional dan pinggang lebih terkontrol.</p>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "gymProgress6Months";
+    function getData() { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+    function saveProgress() {
+      const month = Number(document.getElementById("month").value);
+      const weight = document.getElementById("weight").value;
+      const waist = document.getElementById("waist").value;
+      const gymSessions = document.getElementById("gymSessions").value;
+      const cardio = document.getElementById("cardio").value;
+      const bench = document.getElementById("bench").value;
+      const squat = document.getElementById("squat").value;
+      const deadlift = document.getElementById("deadlift").value;
+      const notes = document.getElementById("notes").value;
+      if (!weight || !waist || !gymSessions) { alert("Isi minimal berat badan, lingkar pinggang, dan total gym bulan ini ya."); return; }
+      let data = getData();
+      const newEntry = { month, weight: Number(weight), waist: Number(waist), gymSessions: Number(gymSessions), cardio: Number(cardio) || 0, bench: Number(bench) || 0, squat: Number(squat) || 0, deadlift: Number(deadlift) || 0, notes: notes.trim() };
+      const existingIndex = data.findIndex(item => item.month === month);
+      if (existingIndex !== -1) data[existingIndex] = newEntry; else data.push(newEntry);
+      data.sort((a, b) => a.month - b.month);
+      saveData(data); renderTable(); clearForm();
+    }
+    function getStatus(entry) {
+      if (entry.gymSessions >= 12 && entry.waist <= 85) return '<span class="badge good">Bagus</span>';
+      if (entry.gymSessions >= 10) return '<span class="badge warn">Lumayan</span>';
+      return '<span class="badge">Perlu Konsisten</span>';
+    }
+    function renderTable() {
+      const data = getData(); const table = document.getElementById("progressTable"); table.innerHTML = ""; let totalGym = 0;
+      for (let i = 1; i <= 6; i++) {
+        const entry = data.find(item => item.month === i);
+        if (entry) {
+          totalGym += entry.gymSessions;
+          table.innerHTML += `<tr><td>Bulan ${entry.month}</td><td>${entry.weight} kg</td><td>${entry.waist} cm</td><td>${entry.gymSessions}x</td><td>${entry.cardio}x</td><td>${entry.bench || "-"} kg</td><td>${entry.squat || "-"} kg</td><td>${entry.deadlift || "-"} kg</td><td>${getStatus(entry)}</td><td>${entry.notes || "-"}</td></tr>`;
+        } else {
+          table.innerHTML += `<tr><td>Bulan ${i}</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td><td><span class="badge">Belum Diisi</span></td><td>-</td></tr>`;
+        }
+      }
+      document.getElementById("monthCount").textContent = `${data.length} / 6`;
+      document.getElementById("totalGym").textContent = totalGym;
+      document.getElementById("avgGym").textContent = data.length ? `${(totalGym / (data.length * 4)).toFixed(1)}x` : "0x";
+      document.getElementById("progressFill").style.width = `${(data.length / 6) * 100}%`;
+    }
+    function clearForm() { ["weight","waist","gymSessions","cardio","bench","squat","deadlift","notes"].forEach(id => document.getElementById(id).value = ""); }
+    function resetData() { if (confirm("Yakin mau hapus semua data progress?")) { localStorage.removeItem(STORAGE_KEY); renderTable(); } }
+    renderTable();
+  </script>
+</body>
+</html>
