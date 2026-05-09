@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>48 Laws of Power</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #e8c97a;
+    --gold-dark: #8a6f2e;
+    --black: #0a0a0a;
+    --dark: #111111;
+    --dark2: #1a1a1a;
+    --dark3: #222222;
+    --text: #e8e0d0;
+    --text-muted: #9a8f7e;
+    --accent: #8b1a1a;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'Cormorant Garamond', serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Noise overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.5;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    padding: 80px 20px 60px;
+    position: relative;
+    border-bottom: 1px solid #2a2a2a;
+    background: linear-gradient(180deg, #0d0d0d 0%, #0a0a0a 100%);
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(180deg, transparent, var(--gold));
+  }
+
+  .header-ornament {
+    font-size: 11px;
+    letter-spacing: 6px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 300;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(42px, 8vw, 88px);
+    font-weight: 900;
+    line-height: 0.9;
+    color: var(--text);
+    letter-spacing: -2px;
+    margin-bottom: 8px;
+  }
+
+  h1 span {
+    color: var(--gold);
+    display: block;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.55em;
+    letter-spacing: 2px;
+  }
+
+  .subtitle {
+    margin-top: 20px;
+    font-size: 13px;
+    letter-spacing: 4px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-weight: 300;
+  }
+
+  .gold-line {
+    width: 80px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    margin: 20px auto;
+  }
+
+  /* Controls */
+  .controls {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(10,10,10,0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid #222;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .search-wrap {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+  }
+
+  .search-wrap::before {
+    content: '⚲';
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%) rotate(45deg);
+    color: var(--gold);
+    font-size: 18px;
+    pointer-events: none;
+  }
+
+  #search {
+    width: 100%;
+    background: var(--dark2);
+    border: 1px solid #2a2a2a;
+    color: var(--text);
+    padding: 10px 14px 10px 40px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.3s;
+    border-radius: 2px;
+  }
+
+  #search:focus { border-color: var(--gold-dark); }
+  #search::placeholder { color: var(--text-muted); }
+
+  .filter-btns {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-btn {
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid #333;
+    color: var(--text-muted);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 13px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-transform: uppercase;
+    border-radius: 2px;
+  }
+
+  .filter-btn:hover, .filter-btn.active {
+    border-color: var(--gold);
+    color: var(--gold);
+    background: rgba(201,168,76,0.05);
+  }
+
+  .counter {
+    font-size: 12px;
+    color: var(--text-muted);
+    letter-spacing: 2px;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  /* Grid */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1px;
+    background: #1a1a1a;
+    padding: 0;
+  }
+
+  .law-card {
+    background: var(--black);
+    padding: 32px 28px;
+    cursor: pointer;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+  }
+
+  .law-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 0;
+    background: var(--gold);
+    transition: height 0.4s ease;
+  }
+
+  .law-card:hover { background: var(--dark2); }
+  .law-card:hover::before { height: 100%; }
+
+  .law-card.expanded { background: var(--dark2); }
+  .law-card.expanded::before { height: 100%; }
+
+  .law-number {
+    font-family: 'Playfair Display', serif;
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--gold);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .law-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.3;
+    margin-bottom: 14px;
+    flex: 1;
+  }
+
+  .law-summary {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-muted);
+    font-weight: 300;
+    font-style: italic;
+    border-top: 1px solid #222;
+    padding-top: 14px;
+  }
+
+  .law-detail {
+    display: none;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #2a2a2a;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .law-card.expanded .law-detail { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .law-detail p {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #b0a090;
+    margin-bottom: 12px;
+  }
+
+  .law-detail .key-action {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid var(--gold-dark);
+    padding: 4px 12px;
+    margin-top: 4px;
+  }
+
+  .expand-hint {
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: #444;
+    text-transform: uppercase;
+    margin-top: 12px;
+    text-align: right;
+    transition: color 0.3s;
+  }
+
+  .law-card:hover .expand-hint { color: var(--gold-dark); }
+  .law-card.expanded .expand-hint { color: var(--gold); }
+
+  .hidden { display: none !important; }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 60px 20px;
+    border-top: 1px solid #1a1a1a;
+    color: var(--text-muted);
+    font-size: 13px;
+    letter-spacing: 2px;
+  }
+
+  footer .quote {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  @media (max-width: 600px) {
+    .grid { grid-template-columns: 1fr; }
+    header { padding: 60px 20px 40px; }
+    .controls { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-ornament">Robert Greene</div>
+  <h1>48 Laws<span>of Power</span></h1>
+  <div class="gold-line"></div>
+  <p class="subtitle">Panduan Lengkap — Klik kartu untuk detail</p>
+</header>
+
+<div class="controls">
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="Cari hukum atau kata kunci...">
+  </div>
+  <div class="filter-btns">
+    <button class="filter-btn active" data-filter="all">Semua</button>
+    <button class="filter-btn" data-filter="power">Kekuasaan</button>
+    <button class="filter-btn" data-filter="enemy">Lawan</button>
+    <button class="filter-btn" data-filter="image">Citra</button>
+    <button class="filter-btn" data-filter="strategy">Strategi</button>
+  </div>
+  <div class="counter" id="counter">48 Hukum</div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<footer>
+  <div class="quote">"Power is the great aphrodisiac."</div>
+  <div>48 Laws of Power · Robert Greene · Referensi Cepat</div>
+</footer>
+
+<script>
+const laws = [
+  {
+    n: 1, title: "Never Outshine the Master",
+    summary: "Jangan pernah tampil lebih cerdas atau mampu dari atasanmu.",
+    detail: "Selalu buat mereka yang di atasmu merasa lebih unggul. Dalam keinginanmu untuk menyenangkan atau membuat terkesan, jangan terlalu jauh sehingga mereka merasa terancam. Sembunyikan bakatmu dengan bijak.",
+    action: "Buat atasan merasa superior",
+    tags: ["power", "strategy"]
+  },
+  {
+    n: 2, title: "Never Put Too Much Trust in Friends, Learn How to Use Enemies",
+    summary: "Jangan terlalu percaya teman; rekrut mantan musuh, mereka lebih bisa diandalkan.",
+    detail: "Teman lebih mudah dikhianati karena iri. Musuh yang dikalahkan punya lebih banyak yang dibuktikan—mereka bekerja lebih keras dan lebih setia. Gunakan mereka dengan bijak.",
+    action: "Rekrut mantan musuh",
+    tags: ["enemy", "power"]
+  },
+  {
+    n: 3, title: "Conceal Your Intentions",
+    summary: "Sembunyikan rencanamu agar musuh tidak bisa mempersiapkan pertahanan.",
+    detail: "Jaga tujuanmu tetap gelap. Gunakan layar asap, bicara tentang keinginan dan tujuan lain untuk mengalihkan perhatian. Orang yang tidak tahu arahmu tidak bisa menghalangimu.",
+    action: "Sembunyikan rencana sejati",
+    tags: ["strategy", "image"]
+  },
+  {
+    n: 4, title: "Always Say Less Than Necessary",
+    summary: "Kata-kata yang sedikit tapi kuat lebih mengesankan daripada banyak bicara.",
+    detail: "Semakin banyak kamu bicara, semakin biasa kamu terlihat dan semakin besar kemungkinanmu mengatakan sesuatu yang bodoh. Diam membuat kamu tampak lebih dalam dan misterius.",
+    action: "Bicara lebih sedikit, kesan lebih besar",
+    tags: ["image", "power"]
+  },
+  {
+    n: 5, title: "So Much Depends on Reputation — Guard It with Your Life",
+    summary: "Reputasi adalah fondasi kekuasaan. Pertahankan, serang reputasi musuh.",
+    detail: "Reputasi yang kuat mencegah banyak pertarungan. Hancurkan musuh dengan merusak reputasi mereka. Waspadai serangan terhadap reputasimu—hadapi segera.",
+    action: "Jaga reputasi seperti nyawa",
+    tags: ["image", "power"]
+  },
+  {
+    n: 6, title: "Court Attention at All Cost",
+    summary: "Lebih baik ditakuti atau dibenci daripada diabaikan.",
+    detail: "Semua hal bergantung pada kehadiran. Buat dirimu dikenal, jadi kontroversial jika perlu. Visibilitas adalah kekuatan—yang tak terlihat tak punya kuasa.",
+    action: "Jadilah pusat perhatian",
+    tags: ["image", "strategy"]
+  },
+  {
+    n: 7, title: "Get Others to Do the Work for You, But Always Take the Credit",
+    summary: "Gunakan kebijaksanaan orang lain; pastikan kredit milikmu.",
+    detail: "Waktu dan energimu berharga. Gunakan pengetahuan dan tenaga orang lain untuk kerjamu sendiri. Tampil sebagai sumber dari semua ide hebat yang dikumpulkan.",
+    action: "Ambil kredit, delegasikan kerja",
+    tags: ["power", "strategy"]
+  },
+  {
+    n: 8, title: "Make Other People Come to You — Use Bait if Necessary",
+    summary: "Ketika kamu paksa orang datang padamu, kamu yang memegang kendali.",
+    detail: "Tarik orang dengan menawarkan sesuatu yang mereka inginkan. Dalam negosiasi dan pertarungan, pihak yang bergerak ke lawan selalu dalam posisi lemah. Buat mereka datang padamu.",
+    action: "Kendalikan dengan menarik, bukan mendorong",
+    tags: ["strategy", "power"]
+  },
+  {
+    n: 9, title: "Win Through Your Actions, Never Through Argument",
+    summary: "Argumentasi jarang mengubah pikiran; tindakan nyata selalu lebih meyakinkan.",
+    detail: "Menang argumen di kata-kata tapi kalah dalam kehidupan nyata. Demonstrasikan sesuatu dengan tindakan daripada debat verbal yang panjang.",
+    action: "Buktikan dengan tindakan",
+    tags: ["strategy", "power"]
+  },
+  {
+    n: 10, title: "Infection: Avoid the Unhappy and Unlucky",
+    summary: "Kemalangan dan negativitas menular; hindari orang-orang yang terinfeksi.",
+    detail: "Kamu bisa mati karena kesengsaraan orang lain—emosi dan keberuntungan buruk menular. Bergaul dengan orang yang bahagia dan beruntung; hindari yang sial.",
+    action: "Jauhi orang negatif dan sial",
+    tags: ["strategy", "power"]
+  },
+  {
+    n: 11, title: "Learn to Keep People Dependent on You",
+    summary: "Agar tetap bebas, kamu harus dibutuhkan dan diinginkan orang lain.",
+    detail: "Jangan ajarkan semua yang kamu tahu. Buat orang bergantung padamu untuk kesejahteraan dan kesuksesan mereka. Jangan pernah ajarkan seseorang cukup agar bisa menggantimu.",
+    action: "Jadilah tak tergantikan",
+    tags: ["power", "strategy"]
+  },
+  {
+    n: 12, title: "Use Selective Honesty and Generosity to Disarm Your Victim",
+    summary: "Satu tindakan jujur atau murah hati bisa menutupi banyak ketidakjujuran.",
+    detail: "Belajar menutupi gerakan berbahaya dengan hadiah dan keramahan. Kepercayaan yang sudah dibangun memungkinkan banyak hal bisa dilakukan tanpa dicurigai.",
+    action: "Gunakan kejujuran sebagai tameng",
+    tags: ["strategy", "enemy"]
+  },
+  {
+    n: 13, title: "When Asking for Help, Appeal to Self-Interest, Never to Mercy or Gratitude",
+    summary: "Tunjukkan bagaimana membantu kamu menguntungkan mereka; jangan mengemis belas kasih.",
+    detail: "Jika kamu butuh bantuan dari orang yang berkuasa, jangan ingatkan mereka tentang jasa lamamu. Sebaliknya, tunjukkan bagaimana permintaanmu memenuhi kepentingan mereka.",
+    action: "Tawarkan manfaat, bukan belas kasih",
+    tags: ["strategy", "power"]
+  },
+  {
+    n: 14, title: "Pose as a Friend, Work as a Spy",
+    summary: "Kumpulkan informasi berharga dengan berpura-pura berteman.",
+    detail: "Ketahui musuhmu dengan menyelidiki mereka. Ajukan pertanyaan tidak langsung untuk mengungkapkan rencananya. Di pesta atau pertemuan sosial, bicaralah sedikit, dengarkan banyak.",
+    action: "Dengarkan lebih banyak dari bicara",
+    tags: ["enemy", "strategy"]
+  },
+  {
+    n: 15, title: "Crush Your Enemy Totally",
+    summary: "Musuh yang dibiarkan hidup akan kembali membalas. Hancurkan sepenuhnya.",
+    detail: "Musuh yang setengah-hancur akan bangkit. Jika kamu harus melawan seseorang, selesaikan pekerjaan itu. Belas kasih dalam pertarungan adalah kelemahan.",
+    action: "Hancurkan musuh sepenuhnya",
+    tags: ["enemy", "power"]
+  },
+  {
+    n: 16, title: "Use Absence to Increase Respect and Honor",
+    summary: "Terlalu tersedia membuat nilai kamu turun; kepergian meningkatkan keinginan.",
+    detail: "Semakin kamu terlihat, semakin biasa kamu. Ciptakan nilai melalui kelangkaan. Pergi sebentar, buat mereka merindukanmu dan menghargaimu lebih.",
+    action: "Jadilah langka untuk dihargai",
+    tags: ["image", "strategy"]
+  },
+  {
+    n: 17, title: "Keep Others in Suspended Terror: Cultivate an Air of Unpredictability",
+    summary: "Perilaku tak terduga menciptakan ketakutan dan kagum.",
+    detail: "Manusia adalah makhluk kebiasaan. Ketidakterdugaan memberikan kekuatan. Sesekali lakukan yang berlawanan dari apa yang diharapkan—buat orang terjaga.",
+    action: "Jadilah tak terduga",
+    tags: ["power", "image"]
+  },
+  {
+    n: 18, title: "Do Not Build Fortresses to Protect Yourself — Isolation is Dangerous",
+    summary: "Isolasi memutus aliran informasi; tetap terhubung untuk bertahan.",
+    detail: "Kerumunan adalah perlindungan; isolasi memaparkanmu pada musuh. Temukan kekuatan dalam kerumunan orang. Mengisolasi diri membuat kamu rentan dan buta.",
+    action: "Tetap terhubung, jangan isolasi",
+    tags: ["strategy", "power"]
+  },
+  {
+    n: 19, title: "Know Who You're Dealing With — Do Not Offend the Wrong Person",
+    summary: "Setiap orang bereaksi berbeda; kenali siapa yang kamu hadapi sebelum bertindak.",
+    detail: "Jangan menyinggung orang yang salah. Dunia memiliki banyak tipe karakter berbeda—si pendendam, si peka berlebihan, si bangga semu. Kenali sebelum bergerak.",
+    action: "Pelajari karakter lawan",
+    tags: ["enemy", "strategy"]
+  },
+  {
+    n: 20, title: "Do Not Commit to Anyone",
+    summary: "Tetap independen dan biarkan semua pihak mengejarmu.",
+    detail: "Jangan bergabung dengan pihak manapun. Jaga kebebasanmu. Saat kamu tidak berkomitmen pada siapapun, kamu akan dihargai oleh semua pihak—tidak ada yang memilikimu.",
+    action: "Pertahankan kebebasan dan independensi",
+    tags: ["power", "strategy"]
+  },
+  {
+    n: 21, title: "Play a Sucker to Catch a Sucker — Seem Dumber Than Your Mark",
+    summary: "Tidak ada yang suka merasa lebih bodoh dari kamu; pura-pura tidak tahu.",
+    detail: "Tidak ada yang suka terlihat bodoh. Dengan berpura-pura lebih bodoh dari targetmu, kamu membuat mereka menurunkan penjagaan. Penipu selalu membuat korban merasa lebih pintar.",
+    action: "Pura-pura bodoh untuk mengontrol",
+    tags: ["strategy", "enemy"]
+  },
+  {
+    n: 22, title: "Use the Surrender Tactic: Transform Weakness into Power",
+    summary: "Menyerah jika lebih lemah; bertarung hanya jika kamu menang.",
+    detail: "Ketika kamu lebih lemah, jangan pernah lawan demi kehormatan. Menyerah memberikan waktu untuk pulih, merencanakan balas dendam, dan menunggu waktu yang tepat.",
+    action: "Menyerah untuk bangkit kembali",
+    tags: ["strategy", "power"]
+  },
+  {
+    n: 23, title: "Concentrate Your Forces",
+    summary: "Pertahankan energi dan sumber dayamu pada titik terkuat.",
+    detail: "Jangan tersebar terlalu tipis. Fokus pada sumber kekuatanmu yang paling berharga. Intensitas mengalahkan penyebaran. Satu sumber energi utama mengalahkan banyak sumber lemah.",
+    action: "Fokuskan kekuatan, jangan tersebar",
+    tags: ["strategy", "power"]
+  },
+  {
+    n: 24, title: "Play the Perfect Courtier",
+    summary: "Kuasai seni menavigasi kekuasaan dengan keanggunan.",
+    detail: "Pelajari aturan istana: jangan langsung, kuasai emosi, jadilah pembawa berita baik, sesuaikan diri dengan suasana hati orang berkuasa. Jadilah tidak ternilai sambil tetap rendah hati.",
+    action: "Kuasai seni berpolitik halus",
+    tags: ["power", "image"]
+  },
+  {
+    n: 25, title: "Re-Create Yourself",
+    summary: "Jangan terima identitas yang ditetapkan masyarakat; ciptakan dirimu sendiri.",
+    detail: "Jadilah arsitek identitasmu sendiri. Ciptakan persona baru dan menakjubkan. Kuasai seni transformasi diri. Ciptakan drama yang menarik perhatian orang.",
+    action: "Ciptakan ulang identitasmu",
+    tags: ["image", "power"]
+  },
+  {
+    n: 26, title: "Keep Your Hands Clean",
+    summary: "Pertahankan tangan bersih dengan menggunakan orang lain sebagai kambing hitam.",
+    detail: "Kamu harus tampak bersih, adil, dan tak bersalah. Kamu membutuhkan orang yang bisa menanggung kekotoran. Temukan orang yang bisa bertindak sebagai agen dan perisai.",
+    action: "Gunakan orang lain untuk pekerjaan kotor",
+    tags: ["image", "strategy"]
+  },
+  {
+    n: 27, title: "Play on People's Need to Believe to Create a Cultlike Following",
+    summary: "Tawarkan kepercayaan dan tujuan; orang haus akan sesuatu untuk dipercaya.",
+    detail: "Orang membutuhkan sesuatu untuk dipercaya. Tawarkan dengan bersikap misterius, samar-samar, semiagama. Jangan jelaskan semuanya—misteri menciptakan pengikut.",
+    action: "Ciptakan aura mistis dan kepercayaan",
+    tags: ["power", "image"]
+  },
+  {
+    n: 28, title: "Enter Action with Boldness",
+    summary: "Kesalahan yang berani bisa dikoreksi; keraguan sulit dipulihkan.",
+    detail: "Keberanian menciptakan rasa respek dan kekaguman. Jika kamu tidak pasti, pura-puralah pasti. Keraguan melemahkan kamu. Tindakan berani, walau salah, bisa diperbaiki.",
+    action: "Bertindak dengan berani dan percaya diri",
+    tags: ["strategy", "power"]
+  },
+  {
+    n: 29, title: "Plan All the Way to the End",
+    summary: "Pertimbangkan semua kemungkinan akhir; antisipasi konsekuensi.",
+    detail: "Rencanakan jauh ke depan. Antisipasi semua konsekuensi, hambatan, dan keberuntungan mungkin sebelum mengambil tindakan. Ambisimu harus jauh tapi matang.",
+    action: "Rencanakan hingga hasil akhir",
+    tags: ["strategy", "power"]
+  },
+  {
+    n: 30, title: "Make Your Accomplishments Seem Effortless",
+    summary: "Sembunyikan upayamu; tampak bahwa segala sesuatunya terjadi secara alami.",
+    detail: "Kemampuanmu harus tampak alami, bukan hasil kerja keras. Sembunyikan latihan di balik panggung. Jika kamu terlihat berjuang, prestasimu tampak kurang mengesankan.",
+    action: "Sembunyikan kerja keras, tampil effortless",
+    tags: ["image", "power"]
+  },
+  {
+    n: 31, title: "Control the Options: Get Others to Play with the Cards You Deal",
+    summary: "Berikan pilihan palsu; semua opsi yang tersedia menguntungkanmu.",
+    detail: "Cara terbaik menipu orang adalah memberi mereka pilihan. Rancang pilihan yang tersedia sehingga apapun yang mereka pilih, kamu yang menang.",
+    action: "Rancang pilihan yang selalu menguntungkanmu",
+    tags: ["strategy", "power"]
+  },
+  {
+    n: 32, title: "Play to People's Fantasies",
+    summary: "Realita keras; fantasi manis. Berikan orang apa yang mereka impikan.",
+    detail: "Orang lebih percaya pada fantasi yang menyenangkan dari pada realita yang pahit. Tawarkan kisah yang indah. Yang bisa menciptakan ilusi memegang kekuatan besar.",
+    action: "Ciptakan ilusi dan fantasi indah",
+    tags: ["image", "strategy"]
+  },
+  {
+    n: 33, title: "Discover Each Man's Thumbscrew",
+    summary: "Temukan kelemahan setiap orang untuk digunakan jika diperlukan.",
+    detail: "Semua orang punya kelemahan—insekuritas, kebutuhan tersembunyi, obsesi kecil. Temukan itu. Kadang itu kebanggan; kadang ketakutan. Gunakan dengan bijaksana.",
+    action: "Temukan dan simpan kelemahan orang",
+    tags: ["enemy", "strategy"]
+  },
+  {
+    n: 34, title: "Be Royal in Your Own Fashion: Act Like a King to Be Treated Like One",
+    summary: "Perlakukan dirimu seperti raja dan orang lain akan mengikutinya.",
+    detail: "Cara kamu mempresentasikan diri mempengaruhi bagaimana orang lain memperlakukanmu. Jika kamu yakin dan bertindak seperti bangsawan, orang akan memperlakukanmu seperti itu.",
+    action: "Proyeksikan kepercayaan diri raja",
+    tags: ["image", "power"]
+  },
+  {
+    n: 35, title: "Master the Art of Timing",
+    summary: "Timing adalah segalanya; kenali kapan bertindak dan kapan menunggu.",
+    detail: "Jangan pernah terlihat terburu-buru. Kesabaran adalah tanda kekuatan. Kenali kapan saat yang tepat untuk bertindak. Bergerak terlalu cepat atau lambat adalah kesalahan fatal.",
+    action: "Kuasai timing, sabar menunggu",
+    tags: ["strategy", "power"]
+  },
+  {
+    n: 36, title: "Disdain Things You Cannot Have: Ignoring Them is the Best Revenge",
+    summary: "Mengakui masalah kecil memberikan mereka kekuatan; abaikan saja.",
+    detail: "Dengan memperhatikan masalah kecil, kamu memberikan eksistensi. Kadang yang terbaik adalah pura-pura tidak peduli. Kesombonganmu mengalahkan mereka.",
+    action: "Abaikan yang tidak bisa kamu miliki",
+    tags: ["image", "enemy"]
+  },
+  {
+    n: 37, title: "Create Compelling Spectacles",
+    summary: "Ciptakan momen visual yang mengesankan untuk memperkuat kekuasaan.",
+    detail: "Simbol dan penampilan mempengaruhi perasaan lebih dari kata-kata. Ciptakan tontonan yang mengesankan—upacara, ritual, kejadian dramatis. Tampak lebih besar dari kenyataanmu.",
+    action: "Ciptakan pertunjukan yang mengesankan",
+    tags: ["image", "power"]
+  },
+  {
+    n: 38, title: "Think as You Like But Behave Like Others",
+    summary: "Jika kamu tampil berbeda terlalu mencolok, orang akan memandangmu aneh.",
+    detail: "Jaga pendapat yang tidak konvensional untuk temanmu. Dalam kehidupan sosial, bertindak sesuai konvensi. Amankan kebebasanmu dengan tidak memperlihatkannya.",
+    action: "Pikir bebas, bertindak konvensional",
+    tags: ["image", "strategy"]
+  },
+  {
+    n: 39, title: "Stir Up Waters to Catch Fish",
+    summary: "Marah selalu membuatmu terlihat lemah; buat orang lain yang kehilangan kontrol.",
+    detail: "Kemarahan dan emosi bisa dimanipulasi. Buat musuhmu marah dengan memprovokasi mereka, sementara kamu tetap tenang. Orang yang kalah kendali diri mudah dikuasai.",
+    action: "Tetap tenang, provokasi agar musuh marah",
+    tags: ["enemy", "strategy"]
+  },
+  {
+    n: 40, title: "Despise the Free Lunch",
+    summary: "Apa yang diberikan gratis datang dengan harga tersembunyi.",
+    detail: "Hadiah dan kemurahan hati yang tampak gratis biasanya datang dengan kewajiban tersembunyi. Bayar harga yang adil dan tetap bebas. Hadiah mengikat dan memperbudak.",
+    action: "Bayar harga adil, hindari utang budi",
+    tags: ["power", "strategy"]
+  },
+  {
+    n: 41, title: "Avoid Stepping into a Great Man's Shoes",
+    summary: "Apa yang terjadi sebelummu bukan milikmu; ciptakan sendiri identitasmu.",
+    detail: "Jika kamu berhasil seseorang yang besar, kamu akan selalu hidup dalam bayangannya. Cari tanah baru untuk dibangun. Jadilah orang pertama daripada yang kedua.",
+    action: "Ciptakan warisan sendiri, bukan teruskan",
+    tags: ["image", "power"]
+  },
+  {
+    n: 42, title: "Strike the Shepherd and the Sheep Will Scatter",
+    summary: "Masalah hampir selalu bisa dilacak ke satu sumber; serang sumbernya.",
+    detail: "Masalah dalam kelompok sering bisa dilacak ke satu individu yang menyebarkan racun. Netralkan orang itu dan kamu menyelesaikan masalah. Jangan biarkan racun menyebar.",
+    action: "Identifikasi dan hapus sumber masalah",
+    tags: ["enemy", "strategy"]
+  },
+  {
+    n: 43, title: "Work on the Hearts and Minds of Others",
+    summary: "Menang di hati dan pikiran, bukan hanya dengan kekuatan.",
+    detail: "Paksaan menciptakan kebencian. Menang melalui persuasi, bukan ancaman. Cari tahu apa yang membuat orang bergerak—nilai, emosi, kepentingan diri—lalu hubungkan dengan gerakan itu.",
+    action: "Menangkan hati sebelum pikiran",
+    tags: ["power", "strategy"]
+  },
+  {
+    n: 44, title: "Disarm and Infuriate with the Mirror Effect",
+    summary: "Tiru persis apa yang dilakukan musuh untuk mempermalukan dan mengacaukan mereka.",
+    detail: "Cermin menciptakan kebingungan dan mempermalukan korban. Dengan meniru persis apa yang dilakukan seseorang, kamu menunjukkan betapa absurd perilaku mereka.",
+    action: "Cerminkan tindakan musuh untuk bingungkan",
+    tags: ["enemy", "strategy"]
+  },
+  {
+    n: 45, title: "Preach the Need for Change, But Never Reform Too Much at Once",
+    summary: "Terlalu banyak perubahan sekaligus menciptakan ketakutan; reformasi perlahan.",
+    detail: "Semua orang memahami kebutuhan perubahan, tapi hati manusia tidak nyaman dengan terlalu banyak perubahan sekaligus. Perubahan harus terlihat tidak berbeda dari yang sudah ada.",
+    action: "Ubah perlahan, tidak mengejutkan",
+    tags: ["strategy", "power"]
+  },
+  {
+    n: 46, title: "Never Appear Too Perfect",
+    summary: "Membangkitkan iri hati berbahaya; akui cacat kecil untuk meredakannya.",
+    detail: "Kesempurnaan menciptakan iri dan kebencian. Tampakkan cacat kecil di tempat yang aman. Ini membuat kamu tampak lebih manusiawi dan mengurangi kecurigaan.",
+    action: "Tunjukkan cacat kecil untuk cegah iri",
+    tags: ["image", "strategy"]
+  },
+  {
+    n: 47, title: "Do Not Go Past the Mark You Aimed for; In Victory, Learn When to Stop",
+    summary: "Jangan melewati tujuanmu; kemenangan berlebihan menciptakan musuh baru.",
+    detail: "Keberhasilan yang terus menerus menciptakan arogansi dan kehilangan presisi. Setelah mencapai tujuan, berhenti. Memanjangkan kemenangan menciptakan musuh baru dan membuat situasi berbahaya.",
+    action: "Kenali batas, berhenti pada waktu tepat",
+    tags: ["strategy", "power"]
+  },
+  {
+    n: 48, title: "Assume Formlessness",
+    summary: "Dengan tidak memiliki bentuk yang tetap, kamu tidak bisa diserang.",
+    detail: "Terima prinsip ketidakbentukan—jadilah adaptif, bergerak, dan tak terdefinisi. Jangan biarkan dirimu dilihat atau ditetapkan. Sesuaikan dengan setiap situasi. Jangan terpaku pada cara tunggal.",
+    action: "Jadilah adaptif dan tak bisa diprediksi",
+    tags: ["strategy", "power"]
+  }
+];
+
+const grid = document.getElementById('grid');
+const searchInput = document.getElementById('search');
+const counter = document.getElementById('counter');
+const filterBtns = document.querySelectorAll('.filter-btn');
+
+let activeFilter = 'all';
+
+function renderCards(list) {
+  grid.innerHTML = '';
+  list.forEach(law => {
+    const card = document.createElement('div');
+    card.className = 'law-card';
+    card.dataset.id = law.n;
+    card.innerHTML = `
+      <div class="law-number">Hukum ${law.n.toString().padStart(2,'0')}</div>
+      <div class="law-title">${law.title}</div>
+      <div class="law-summary">${law.summary}</div>
+      <div class="law-detail">
+        <p>${law.detail}</p>
+        <span class="key-action">${law.action}</span>
+      </div>
+      <div class="expand-hint">↓ detail</div>
+    `;
+    card.addEventListener('click', () => {
+      const isExp = card.classList.contains('expanded');
+      document.querySelectorAll('.law-card.expanded').forEach(c => {
+        c.classList.remove('expanded');
+        c.querySelector('.expand-hint').textContent = '↓ detail';
+      });
+      if (!isExp) {
+        card.classList.add('expanded');
+        card.querySelector('.expand-hint').textContent = '↑ tutup';
+      }
+    });
+    grid.appendChild(card);
+  });
+  counter.textContent = `${list.length} Hukum`;
+}
+
+function getFiltered() {
+  const q = searchInput.value.toLowerCase().trim();
+  return laws.filter(law => {
+    const matchFilter = activeFilter === 'all' || law.tags.includes(activeFilter);
+    const matchSearch = !q || 
+      law.title.toLowerCase().includes(q) || 
+      law.summary.toLowerCase().includes(q) || 
+      law.detail.toLowerCase().includes(q) ||
+      law.action.toLowerCase().includes(q) ||
+      String(law.n).includes(q);
+    return matchFilter && matchSearch;
+  });
+}
+
+searchInput.addEventListener('input', () => renderCards(getFiltered()));
+
+filterBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    filterBtns.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    renderCards(getFiltered());
+  });
+});
+
+renderCards(laws);
+</script>
+</body>
+</html>
