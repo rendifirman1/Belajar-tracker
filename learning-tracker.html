@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>365-Day Learning Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sora', 'Segoe UI', sans-serif;
+      background: #f4f5f9;
+      min-height: 100vh;
+      color: #1a1a2e;
+    }
+
+    /* HEADER */
+    #header {
+      background: #fff;
+      border-bottom: 2px solid #ececf3;
+      padding: 16px 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    }
+
+    #app-title {
+      font-weight: 800;
+      font-size: 18px;
+      color: #1a1a2e;
+      letter-spacing: -0.5px;
+      margin-bottom: 14px;
+    }
+
+    #tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 0;
+      scrollbar-width: none;
+    }
+    #tabs::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 12px 12px 0 0;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: 'Sora', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.18s;
+      min-width: 90px;
+      flex-shrink: 0;
+      color: #777;
+      background: #f0f0f6;
+    }
+    .tab-btn.active {
+      color: #fff;
+      font-weight: 700;
+      transform: translateY(2px);
+    }
+    .tab-emoji { font-size: 18px; margin-bottom: 3px; }
+    .tab-progress { font-size: 10px; opacity: 0.85; margin-top: 2px; }
+
+    /* MAIN */
+    #main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 20px 14px 40px;
+    }
+
+    /* PROGRESS CARD */
+    #progress-card {
+      border-radius: 16px;
+      padding: 20px 22px;
+      margin-bottom: 18px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      transition: background 0.3s;
+    }
+    #card-emoji { font-size: 40px; }
+    #card-info { flex: 1; min-width: 160px; }
+    #card-title { font-weight: 800; font-size: 20px; margin-bottom: 4px; }
+    #card-sub { opacity: 0.85; font-size: 12px; }
+    #bar-wrap { margin-top: 10px; background: rgba(255,255,255,0.25); border-radius: 99px; height: 8px; }
+    #bar-fill { height: 8px; border-radius: 99px; background: #fff; transition: width 0.4s ease; }
+    #card-pct { text-align: center; }
+    #pct-num { font-weight: 800; font-size: 44px; line-height: 1; }
+    #pct-label { opacity: 0.8; font-size: 12px; margin-top: 4px; }
+
+    /* DAY GRID CONTAINER */
+    #grid-container {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border: 1px solid #ececf3;
+    }
+    #grid-title {
+      font-weight: 700;
+      font-size: 14px;
+      color: #1a1a2e;
+      margin-bottom: 18px;
+    }
+
+    /* MONTH */
+    .month-block { margin-bottom: 18px; }
+    .month-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #aaa;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .day-row { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    .day-btn {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      border: 2px solid #e8e8f0;
+      background: #fafafa;
+      color: #bbb;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .day-btn.done {
+      color: #fff;
+      transform: scale(1.08);
+    }
+
+    @media (max-width: 480px) {
+      .day-btn { width: 30px; height: 30px; font-size: 9px; border-radius: 6px; }
+      #pct-num { font-size: 34px; }
+      #card-title { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="header">
+  <div id="app-title">📅 365-Day Learning Tracker</div>
+  <div id="tabs"></div>
+</div>
+
+<div id="main">
+  <div id="progress-card">
+    <div id="card-emoji"></div>
+    <div id="card-info">
+      <div id="card-title"></div>
+      <div id="card-sub"></div>
+      <div id="bar-wrap"><div id="bar-fill" style="width:0%"></div></div>
+    </div>
+    <div id="card-pct">
+      <div id="pct-num">0%</div>
+      <div id="pct-label">Progress</div>
+    </div>
+  </div>
+
+  <div id="grid-container">
+    <div id="grid-title"></div>
+    <div id="day-grid"></div>
+  </div>
+</div>
+
+<script>
+  const CATEGORIES = [
+    { id: "english",    label: "Bahasa Inggris", emoji: "🇬🇧", color: "#4f8ef7" },
+    { id: "katalon",    label: "Katalon",         emoji: "⚡",  color: "#f7a24f" },
+    { id: "playwright", label: "Playwright",       emoji: "🎭", color: "#7c4ff7" },
+    { id: "postman",    label: "Postman",          emoji: "📮", color: "#f74f6e" },
+    { id: "books",      label: "Baca Buku",        emoji: "📚", color: "#4fc97f" },
+  ];
+
+  const MONTHS = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+  const MONTH_DAYS = [31,28,31,30,31,30,31,31,30,31,30,31];
+
+  let activeId = "english";
+  let checked = {};
+
+  // STORAGE
+  function saveData() {
+    try { localStorage.setItem("tracker365_v1", JSON.stringify(checked)); } catch(e) {}
+  }
+  function loadData() {
+    try {
+      const raw = localStorage.getItem("tracker365_v1");
+      if (raw) checked = JSON.parse(raw);
+    } catch(e) {}
+  }
+
+  function getProgress(catId) {
+    let done = 0;
+    for (let d = 1; d <= 365; d++) {
+      if (checked[catId + "_" + d]) done++;
+    }
+    return { done, pct: Math.round((done / 365) * 100) };
+  }
+
+  // RENDER TABS
+  function renderTabs() {
+    const tabsEl = document.getElementById("tabs");
+    tabsEl.innerHTML = "";
+    CATEGORIES.forEach(c => {
+      const { done, pct } = getProgress(c.id);
+      const btn = document.createElement("button");
+      btn.className = "tab-btn" + (c.id === activeId ? " active" : "");
+      if (c.id === activeId) btn.style.background = c.color;
+      btn.innerHTML = `
+        <span class="tab-emoji">${c.emoji}</span>
+        <span>${c.label}</span>
+        <span class="tab-progress">${done}/365 · ${pct}%</span>
+      `;
+      if (c.id === activeId) {
+        btn.style.boxShadow = `0 4px 16px ${c.color}55`;
+      }
+      btn.onclick = () => { activeId = c.id; render(); };
+      tabsEl.appendChild(btn);
+    });
+  }
+
+  // RENDER CARD
+  function renderCard(cat, progress) {
+    const card = document.getElementById("progress-card");
+    card.style.background = cat.color;
+    card.style.boxShadow = `0 8px 32px ${cat.color}44`;
+
+    document.getElementById("card-emoji").textContent = cat.emoji;
+    document.getElementById("card-title").textContent = cat.label;
+    document.getElementById("card-sub").textContent =
+      `${progress.done} hari selesai · ${365 - progress.done} hari tersisa`;
+    document.getElementById("bar-fill").style.width = progress.pct + "%";
+    document.getElementById("pct-num").textContent = progress.pct + "%";
+  }
+
+  // RENDER GRID
+  function renderGrid(cat) {
+    document.getElementById("grid-title").textContent =
+      `${cat.emoji} ${cat.label} — Klik hari yang sudah kamu selesaikan`;
+
+    const grid = document.getElementById("day-grid");
+    grid.innerHTML = "";
+
+    let dayCount = 0;
+    MONTHS.forEach((name, mi) => {
+      const block = document.createElement("div");
+      block.className = "month-block";
+
+      const label = document.createElement("div");
+      label.className = "month-label";
+      label.textContent = name;
+      block.appendChild(label);
+
+      const row = document.createElement("div");
+      row.className = "day-row";
+
+      for (let d = 0; d < MONTH_DAYS[mi] && dayCount < 365; d++) {
+        dayCount++;
+        const day = dayCount;
+        const key = cat.id + "_" + day;
+        const isDone = !!checked[key];
+
+        const btn = document.createElement("button");
+        btn.className = "day-btn" + (isDone ? " done" : "");
+        btn.title = "Hari " + day;
+        btn.textContent = isDone ? "✓" : day;
+        if (isDone) {
+          btn.style.background = cat.color;
+          btn.style.borderColor = cat.color;
+          btn.style.boxShadow = `0 2px 8px ${cat.color}44`;
+        }
+
+        btn.onclick = () => {
+          checked[key] = !checked[key];
+          saveData();
+          render();
+        };
+
+        row.appendChild(btn);
+      }
+
+      block.appendChild(row);
+      grid.appendChild(block);
+    });
+  }
+
+  // FULL RENDER
+  function render() {
+    const cat = CATEGORIES.find(c => c.id === activeId);
+    const progress = getProgress(activeId);
+    renderTabs();
+    renderCard(cat, progress);
+    renderGrid(cat);
+  }
+
+  // INIT
+  loadData();
+  render();
+</script>
+</body>
+</html>
