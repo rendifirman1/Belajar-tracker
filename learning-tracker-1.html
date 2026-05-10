@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Learning Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sora', 'Segoe UI', sans-serif;
+      background: #f4f5f9;
+      min-height: 100vh;
+      color: #1a1a2e;
+    }
+
+    #header {
+      background: #fff;
+      border-bottom: 2px solid #ececf3;
+      padding: 16px 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+    }
+    #app-title {
+      font-weight: 800;
+      font-size: 18px;
+      color: #1a1a2e;
+      letter-spacing: -0.5px;
+      margin-bottom: 14px;
+    }
+    #tabs {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    #tabs::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 10px 14px;
+      border-radius: 12px 12px 0 0;
+      border: none;
+      cursor: pointer;
+      white-space: nowrap;
+      font-family: 'Sora', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.18s;
+      min-width: 90px;
+      flex-shrink: 0;
+      color: #777;
+      background: #f0f0f6;
+    }
+    .tab-btn.active { color: #fff; font-weight: 700; transform: translateY(2px); }
+    .tab-emoji { font-size: 18px; margin-bottom: 3px; }
+    .tab-progress { font-size: 10px; opacity: 0.85; margin-top: 2px; }
+
+    /* YEAR SWITCHER */
+    #year-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: #fff;
+      border-bottom: 1px solid #ececf3;
+    }
+    .year-btn {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 2px solid #e0e0ea;
+      background: #fafafa;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: #555;
+      transition: all 0.15s;
+      font-family: 'Sora', sans-serif;
+    }
+    .year-btn:hover { background: #f0f0f6; border-color: #ccc; }
+    .year-btn:disabled { opacity: 0.3; cursor: default; }
+    #year-label {
+      font-weight: 800;
+      font-size: 18px;
+      color: #1a1a2e;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    #main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 20px 14px 40px;
+    }
+
+    /* PROGRESS CARD */
+    #progress-card {
+      border-radius: 16px;
+      padding: 20px 22px;
+      margin-bottom: 18px;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    #card-emoji { font-size: 38px; }
+    #card-info { flex: 1; min-width: 160px; }
+    #card-title { font-weight: 800; font-size: 20px; margin-bottom: 4px; }
+    #card-sub { opacity: 0.85; font-size: 12px; }
+    #bar-wrap { margin-top: 10px; background: rgba(255,255,255,0.25); border-radius: 99px; height: 8px; }
+    #bar-fill { height: 8px; border-radius: 99px; background: #fff; transition: width 0.4s ease; }
+    #card-right { text-align: right; }
+    #pct-num { font-weight: 800; font-size: 42px; line-height: 1; }
+    #pct-label { opacity: 0.8; font-size: 11px; margin-top: 2px; }
+    #year-total { font-size: 11px; opacity: 0.75; margin-top: 6px; }
+
+    /* GRID */
+    #grid-container {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+      border: 1px solid #ececf3;
+    }
+    #grid-title { font-weight: 700; font-size: 14px; color: #1a1a2e; margin-bottom: 18px; }
+
+    .month-block { margin-bottom: 20px; }
+    .month-label {
+      font-size: 11px; font-weight: 700;
+      color: #aaa; letter-spacing: 1px;
+      text-transform: uppercase; margin-bottom: 8px;
+    }
+    .day-row { display: flex; flex-wrap: wrap; gap: 5px; }
+
+    .day-btn {
+      width: 38px; height: 44px;
+      border-radius: 8px;
+      border: 2px solid #e8e8f0;
+      background: #fafafa;
+      color: #bbb;
+      cursor: pointer;
+      font-family: 'Sora', sans-serif;
+      transition: all 0.15s;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      line-height: 1.2; position: relative;
+    }
+    .day-btn:hover { border-color: #ccc; background: #f0f0f6; }
+    .day-btn.done { color: #fff; transform: scale(1.06); }
+    .day-btn.today { outline: 3px solid #1a1a2e; outline-offset: 2px; }
+    .day-btn.future { opacity: 0.4; cursor: default; }
+    .day-btn .day-num { font-size: 11px; font-weight: 800; }
+    .day-btn .day-name { font-size: 8px; font-weight: 600; opacity: 0.75; }
+    .day-btn.has-note .day-num::after {
+      content: "·"; font-size: 14px;
+      vertical-align: top; line-height: 0.7;
+    }
+
+    /* MODAL */
+    #modal-overlay {
+      display: none; position: fixed;
+      inset: 0; background: rgba(0,0,0,0.45);
+      z-index: 200; align-items: flex-end; justify-content: center;
+    }
+    #modal-overlay.open { display: flex; }
+    #modal {
+      background: #fff; border-radius: 20px 20px 0 0;
+      padding: 24px 20px 36px;
+      width: 100%; max-width: 500px;
+      animation: slideUp 0.22s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(60px); opacity: 0; }
+      to   { transform: translateY(0);   opacity: 1; }
+    }
+    #modal-date { font-weight: 800; font-size: 17px; margin-bottom: 3px; color: #1a1a2e; }
+    #modal-cat  { font-size: 12px; color: #aaa; margin-bottom: 16px; }
+
+    #modal-check-row {
+      display: flex; align-items: center;
+      gap: 12px; margin-bottom: 18px; cursor: pointer;
+    }
+    #modal-checkbox {
+      width: 26px; height: 26px; border-radius: 7px;
+      border: 2px solid #ddd;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; transition: all 0.15s;
+      flex-shrink: 0; background: #fafafa;
+    }
+    #modal-check-label { font-weight: 700; font-size: 14px; color: #333; user-select: none; }
+
+    #modal-note-label { font-size: 12px; font-weight: 700; color: #888; margin-bottom: 8px; display: block; }
+    #modal-textarea {
+      width: 100%; min-height: 110px;
+      border: 2px solid #e8e8f0; border-radius: 10px;
+      padding: 10px 12px;
+      font-family: 'Sora', sans-serif; font-size: 13px;
+      color: #1a1a2e; resize: vertical; outline: none;
+      transition: border 0.15s; background: #fafafa; line-height: 1.6;
+    }
+    #modal-textarea:focus { border-color: #aaa; background: #fff; }
+    #modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .btn-cancel {
+      flex: 1; padding: 13px; border-radius: 10px;
+      border: 2px solid #e8e8f0; background: #fafafa;
+      font-family: 'Sora', sans-serif; font-size: 13px;
+      font-weight: 700; cursor: pointer; color: #888;
+    }
+    .btn-save {
+      flex: 2; padding: 13px; border-radius: 10px;
+      border: none; font-family: 'Sora', sans-serif;
+      font-size: 13px; font-weight: 700; cursor: pointer; color: #fff;
+      transition: opacity 0.15s;
+    }
+    .btn-save:hover { opacity: 0.88; }
+
+    @media (max-width: 480px) {
+      .day-btn { width: 32px; height: 40px; }
+      .day-btn .day-num { font-size: 10px; }
+      .day-btn .day-name { font-size: 7px; }
+      #pct-num { font-size: 32px; }
+      #card-title { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="header">
+  <div id="app-title">📅 Learning Tracker</div>
+  <div id="tabs"></div>
+</div>
+
+<!-- YEAR SWITCHER -->
+<div id="year-bar">
+  <button class="year-btn" id="btn-prev-year">‹</button>
+  <div id="year-label">2025</div>
+  <button class="year-btn" id="btn-next-year">›</button>
+</div>
+
+<div id="main">
+  <div id="progress-card">
+    <div id="card-emoji"></div>
+    <div id="card-info">
+      <div id="card-title"></div>
+      <div id="card-sub"></div>
+      <div id="bar-wrap"><div id="bar-fill" style="width:0%"></div></div>
+    </div>
+    <div id="card-right">
+      <div id="pct-num">0%</div>
+      <div id="pct-label">Tahun ini</div>
+      <div id="year-total"></div>
+    </div>
+  </div>
+
+  <div id="grid-container">
+    <div id="grid-title"></div>
+    <div id="day-grid"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div id="modal-overlay">
+  <div id="modal">
+    <div id="modal-date"></div>
+    <div id="modal-cat"></div>
+    <div id="modal-check-row">
+      <div id="modal-checkbox"></div>
+      <div id="modal-check-label">Tandai sudah belajar</div>
+    </div>
+    <span id="modal-note-label">📝 Yang dipelajari:</span>
+    <textarea id="modal-textarea" placeholder="Tulis ringkasan apa yang kamu pelajari hari ini..."></textarea>
+    <div id="modal-actions">
+      <button class="btn-cancel" id="btn-cancel">Batal</button>
+      <button class="btn-save" id="btn-save">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const CATEGORIES = [
+    { id: "english",    label: "Bahasa Inggris", emoji: "🇬🇧", color: "#4f8ef7" },
+    { id: "katalon",    label: "Katalon",         emoji: "⚡",  color: "#f7a24f" },
+    { id: "playwright", label: "Playwright",       emoji: "🎭", color: "#7c4ff7" },
+    { id: "postman",    label: "Postman",          emoji: "📮", color: "#f74f6e" },
+    { id: "books",      label: "Baca Buku",        emoji: "📚", color: "#4fc97f" },
+  ];
+
+  const MONTHS_FULL = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+  const DAYS_SHORT  = ["Min","Sen","Sel","Rab","Kam","Jum","Sab"];
+
+  const MIN_YEAR = 2025;
+  const MAX_YEAR = 2027;
+
+  const TODAY     = new Date();
+  const TODAY_KEY = fmtKey(TODAY.getFullYear(), TODAY.getMonth(), TODAY.getDate());
+
+  let activeId  = "english";
+  let activeYear= TODAY.getFullYear();
+  let appData   = {};
+  let modal     = { catId:"", dateKey:"", mi:0, day:0, done:false };
+
+  /* ---- HELPERS ---- */
+  function isLeap(y) { return (y%4===0 && y%100!==0) || y%400===0; }
+  function monthDays(y) { return [31, isLeap(y)?29:28, 31,30,31,30,31,31,30,31,30,31]; }
+  function daysInYear(y) { return isLeap(y) ? 366 : 365; }
+  function fmtKey(y, m, d) { return `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; }
+
+  function isFuture(y, m, d) {
+    const t = new Date(); t.setHours(0,0,0,0);
+    const dt = new Date(y, m, d);
+    return dt > t;
+  }
+
+  /* ---- STORAGE ---- */
+  function save() {
+    try { localStorage.setItem("lt_v3", JSON.stringify(appData)); } catch(e) {}
+  }
+  function load() {
+    try { const r = localStorage.getItem("lt_v3"); if (r) appData = JSON.parse(r); } catch(e) {}
+    CATEGORIES.forEach(c => { if (!appData[c.id]) appData[c.id] = {}; });
+  }
+
+  /* ---- PROGRESS (per year) ---- */
+  function getProgress(catId, year) {
+    const total = daysInYear(year);
+    const md    = monthDays(year);
+    let done    = 0;
+    for (let m = 0; m < 12; m++) {
+      for (let d = 1; d <= md[m]; d++) {
+        const k = fmtKey(year, m, d);
+        if ((appData[catId]||{})[k]?.done) done++;
+      }
+    }
+    return { done, total, pct: Math.round(done / total * 100) };
+  }
+
+  /* ---- ALL-TIME DONE ---- */
+  function getAllDone(catId) {
+    return Object.values(appData[catId]||{}).filter(v=>v?.done).length;
+  }
+
+  /* ---- RENDER TABS ---- */
+  function renderTabs() {
+    const el = document.getElementById("tabs");
+    el.innerHTML = "";
+    CATEGORIES.forEach(c => {
+      const { done, pct } = getProgress(c.id, activeYear);
+      const btn = document.createElement("button");
+      const isA = c.id === activeId;
+      btn.className = "tab-btn" + (isA ? " active" : "");
+      if (isA) { btn.style.background = c.color; btn.style.boxShadow = `0 4px 16px ${c.color}55`; }
+      btn.innerHTML = `<span class="tab-emoji">${c.emoji}</span><span>${c.label}</span><span class="tab-progress">${done}/${daysInYear(activeYear)} · ${pct}%</span>`;
+      btn.onclick = () => { activeId = c.id; render(); };
+      el.appendChild(btn);
+    });
+  }
+
+  /* ---- RENDER CARD ---- */
+  function renderCard(cat, prog) {
+    const card = document.getElementById("progress-card");
+    card.style.background = cat.color;
+    card.style.boxShadow  = `0 8px 32px ${cat.color}44`;
+    document.getElementById("card-emoji").textContent  = cat.emoji;
+    document.getElementById("card-title").textContent  = cat.label;
+    document.getElementById("card-sub").textContent    = `${prog.done} hari selesai · ${prog.total - prog.done} hari tersisa`;
+    document.getElementById("bar-fill").style.width    = prog.pct + "%";
+    document.getElementById("pct-num").textContent     = prog.pct + "%";
+    document.getElementById("year-total").textContent  = `Total semua: ${getAllDone(cat.id)} hari`;
+  }
+
+  /* ---- RENDER GRID ---- */
+  function renderGrid(cat) {
+    document.getElementById("grid-title").textContent = `${cat.emoji} ${cat.label} ${activeYear} — Ketuk tanggal untuk tandai & catat`;
+    const grid = document.getElementById("day-grid");
+    grid.innerHTML = "";
+    const md    = monthDays(activeYear);
+    const catD  = appData[cat.id] || {};
+
+    md.forEach((days, mi) => {
+      const block = document.createElement("div");
+      block.className = "month-block";
+
+      const lbl = document.createElement("div");
+      lbl.className   = "month-label";
+      lbl.textContent = `${MONTHS_FULL[mi]} ${activeYear}`;
+      block.appendChild(lbl);
+
+      const row = document.createElement("div");
+      row.className = "day-row";
+
+      for (let d = 1; d <= days; d++) {
+        const key     = fmtKey(activeYear, mi, d);
+        const entry   = catD[key] || {};
+        const isDone  = !!entry.done;
+        const hasNote = !!(entry.note && entry.note.trim());
+        const isToday = key === TODAY_KEY;
+        const future  = isFuture(activeYear, mi, d);
+        const dow     = new Date(activeYear, mi, d).getDay();
+
+        const btn = document.createElement("button");
+        btn.className = "day-btn"
+          + (isDone   ? " done"    : "")
+          + (isToday  ? " today"   : "")
+          + (hasNote  ? " has-note": "")
+          + (future   ? " future"  : "");
+
+        btn.innerHTML = `<span class="day-num">${isDone ? "✓" : d}</span><span class="day-name">${DAYS_SHORT[dow]}</span>`;
+
+        if (isDone) {
+          btn.style.background  = cat.color;
+          btn.style.borderColor = cat.color;
+          btn.style.boxShadow   = `0 2px 8px ${cat.color}44`;
+          btn.style.color       = "#fff";
+        }
+
+        if (!future) {
+          btn.onclick = () => openModal(cat, key, mi, d);
+        }
+
+        row.appendChild(btn);
+      }
+
+      block.appendChild(row);
+      grid.appendChild(block);
+    });
+  }
+
+  /* ---- MODAL ---- */
+  function openModal(cat, key, mi, d) {
+    modal = { catId: cat.id, dateKey: key, mi, day: d, done: false };
+    const entry = (appData[cat.id]||{})[key] || {};
+    modal.done  = !!entry.done;
+
+    const dow = new Date(activeYear, mi, d).getDay();
+    document.getElementById("modal-date").textContent = `${DAYS_SHORT[dow]}, ${d} ${MONTHS_FULL[mi]} ${activeYear}`;
+    document.getElementById("modal-cat").textContent  = `${cat.emoji} ${cat.label}`;
+    document.getElementById("modal-textarea").value   = entry.note || "";
+    document.getElementById("btn-save").style.background = cat.color;
+
+    refreshCb(cat.color);
+    document.getElementById("modal-overlay").classList.add("open");
+    setTimeout(() => document.getElementById("modal-textarea").focus(), 150);
+  }
+
+  function refreshCb(color) {
+    const cb = document.getElementById("modal-checkbox");
+    if (modal.done) {
+      cb.textContent = "✓"; cb.style.background = color;
+      cb.style.borderColor = color; cb.style.color = "#fff";
+    } else {
+      cb.textContent = ""; cb.style.background = "#fafafa";
+      cb.style.borderColor = "#ddd"; cb.style.color = "#bbb";
+    }
+  }
+
+  function closeModal() { document.getElementById("modal-overlay").classList.remove("open"); }
+
+  function saveModal() {
+    const note = document.getElementById("modal-textarea").value.trim();
+    if (!appData[modal.catId]) appData[modal.catId] = {};
+    appData[modal.catId][modal.dateKey] = { done: modal.done, note };
+    save(); closeModal(); render();
+  }
+
+  /* ---- YEAR NAV ---- */
+  function updateYearBar() {
+    document.getElementById("year-label").textContent = activeYear;
+    document.getElementById("btn-prev-year").disabled = activeYear <= MIN_YEAR;
+    document.getElementById("btn-next-year").disabled = activeYear >= MAX_YEAR;
+  }
+
+  document.getElementById("btn-prev-year").onclick = () => {
+    if (activeYear > MIN_YEAR) { activeYear--; render(); }
+  };
+  document.getElementById("btn-next-year").onclick = () => {
+    if (activeYear < MAX_YEAR) { activeYear++; render(); }
+  };
+
+  /* ---- EVENTS ---- */
+  document.getElementById("modal-check-row").onclick = () => {
+    modal.done = !modal.done;
+    const cat  = CATEGORIES.find(c => c.id === modal.catId);
+    refreshCb(cat ? cat.color : "#4f8ef7");
+  };
+  document.getElementById("btn-cancel").onclick = closeModal;
+  document.getElementById("btn-save").onclick   = saveModal;
+  document.getElementById("modal-overlay").onclick = (e) => {
+    if (e.target === document.getElementById("modal-overlay")) closeModal();
+  };
+
+  /* ---- FULL RENDER ---- */
+  function render() {
+    updateYearBar();
+    const cat  = CATEGORIES.find(c => c.id === activeId);
+    const prog = getProgress(activeId, activeYear);
+    renderTabs();
+    renderCard(cat, prog);
+    renderGrid(cat);
+  }
+
+  load();
+  render();
+</script>
+</body>
+</html>
