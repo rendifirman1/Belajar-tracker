@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalkulator Jam Pulang Kerja</title>
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .container {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 30px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-width: 420px;
+    width: 100%;
+  }
+  h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 8px;
+    font-size: 24px;
+  }
+  .subtitle {
+    text-align: center;
+    color: #888;
+    margin-bottom: 30px;
+    font-size: 14px;
+  }
+  .input-group {
+    margin-bottom: 20px;
+  }
+  label {
+    display: block;
+    color: #555;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  .time-inputs {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  input[type="number"] {
+    flex: 1;
+    padding: 14px;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 18px;
+    text-align: center;
+    transition: border-color 0.2s;
+  }
+  input[type="number"]:focus {
+    outline: none;
+    border-color: #667eea;
+  }
+  .separator {
+    font-size: 24px;
+    font-weight: bold;
+    color: #667eea;
+  }
+  button {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: transform 0.2s;
+  }
+  button:hover {
+    transform: translateY(-2px);
+  }
+  button:active {
+    transform: translateY(0);
+  }
+  .result {
+    margin-top: 25px;
+    padding: 25px;
+    background: #f7f7ff;
+    border-radius: 12px;
+    text-align: center;
+    display: none;
+  }
+  .result.show {
+    display: block;
+  }
+  .result-label {
+    color: #888;
+    font-size: 14px;
+    margin-bottom: 8px;
+  }
+  .result-time {
+    color: #667eea;
+    font-size: 42px;
+    font-weight: bold;
+    letter-spacing: 2px;
+  }
+  .result-info {
+    color: #666;
+    font-size: 13px;
+    margin-top: 10px;
+  }
+  .error {
+    color: #e74c3c;
+    font-size: 13px;
+    margin-top: 8px;
+    text-align: center;
+    display: none;
+  }
+  .error.show {
+    display: block;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>⏰ Kalkulator Jam Pulang</h1>
+    <p class="subtitle">Hitung jam pulang setelah 9 jam kerja</p>
+
+    <div class="input-group">
+      <label>Jam Masuk Kantor (Format 24 jam)</label>
+      <div class="time-inputs">
+        <input type="number" id="jam" min="0" max="23" placeholder="HH" value="">
+        <span class="separator">:</span>
+        <input type="number" id="menit" min="0" max="59" placeholder="MM" value="">
+      </div>
+      <p class="error" id="error">Masukkan jam (0-23) dan menit (0-59) yang valid</p>
+    </div>
+
+    <button onclick="hitung()">Hitung Jam Pulang</button>
+
+    <div class="result" id="result">
+      <div class="result-label">Jam Pulang Kamu</div>
+      <div class="result-time" id="hasil">--:--</div>
+      <div class="result-info" id="info"></div>
+    </div>
+  </div>
+
+<script>
+  function hitung() {
+    const jamInput = document.getElementById('jam');
+    const menitInput = document.getElementById('menit');
+    const error = document.getElementById('error');
+    const result = document.getElementById('result');
+    const hasil = document.getElementById('hasil');
+    const info = document.getElementById('info');
+
+    const jam = parseInt(jamInput.value);
+    const menit = parseInt(menitInput.value);
+
+    // Validasi
+    if (isNaN(jam) || isNaN(menit) || jam < 0 || jam > 23 || menit < 0 || menit > 59) {
+      error.classList.add('show');
+      result.classList.remove('show');
+      return;
+    }
+
+    error.classList.remove('show');
+
+    // Tambah 9 jam
+    let jamPulang = jam + 9;
+    let menitPulang = menit;
+    let lewatHari = false;
+
+    if (jamPulang >= 24) {
+      jamPulang -= 24;
+      lewatHari = true;
+    }
+
+    // Format jadi 2 digit
+    const jamStr = String(jamPulang).padStart(2, '0');
+    const menitStr = String(menitPulang).padStart(2, '0');
+
+    hasil.textContent = `${jamStr}:${menitStr}`;
+    
+    const jamMasukStr = `${String(jam).padStart(2, '0')}:${String(menit).padStart(2, '0')}`;
+    info.textContent = lewatHari 
+      ? `Masuk ${jamMasukStr} → Pulang besok pukul ${jamStr}:${menitStr}`
+      : `Masuk ${jamMasukStr} + 9 jam = Pulang ${jamStr}:${menitStr}`;
+
+    result.classList.add('show');
+  }
+
+  // Enter untuk submit
+  document.getElementById('jam').addEventListener('keypress', e => {
+    if (e.key === 'Enter') document.getElementById('menit').focus();
+  });
+  document.getElementById('menit').addEventListener('keypress', e => {
+    if (e.key === 'Enter') hitung();
+  });
+</script>
+</body>
+</html>
