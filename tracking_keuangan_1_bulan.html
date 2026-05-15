@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tracking Keuangan 1 Bulan</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    * { box-sizing: border-box; font-family: Arial, sans-serif; }
+    body { margin: 0; background: #f4f6f8; color: #222; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 24px; }
+    h1 { margin-bottom: 8px; }
+    .subtitle { color: #666; margin-bottom: 24px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .card { background: #fff; border-radius: 16px; padding: 20px; box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    label { display: block; margin-top: 12px; font-weight: bold; font-size: 14px; }
+    input, select, button { width: 100%; padding: 12px; margin-top: 6px; border-radius: 10px; border: 1px solid #ccc; font-size: 15px; }
+    button { margin-top: 18px; border: none; background: #2563eb; color: white; font-weight: bold; cursor: pointer; }
+    button:hover { background: #1d4ed8; }
+    .danger { background: #dc2626; }
+    .danger:hover { background: #b91c1c; }
+    .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin: 20px 0; }
+    .summary-box { background: #fff; border-radius: 14px; padding: 18px; box-shadow: 0 6px 18px rgba(0,0,0,0.06); }
+    .summary-box span { display: block; color: #666; font-size: 14px; margin-bottom: 8px; }
+    .summary-box strong { font-size: 22px; }
+    .income { color: #16a34a; }
+    .expense { color: #dc2626; }
+    .balance { color: #2563eb; }
+    table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+    th, td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; font-size: 14px; }
+    th { background: #f8fafc; }
+    .delete-btn { background: #ef4444; padding: 8px 10px; width: auto; margin: 0; font-size: 13px; }
+    .chart-wrap { min-height: 320px; }
+    .full { grid-column: 1 / -1; }
+    @media (max-width: 768px) { .grid, .summary { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Tracking Keuangan 1 Bulan</h1>
+    <p class="subtitle">Input pemasukan dan pengeluaran berdasarkan kategori. Diagram bulat akan otomatis menghitung persentase pengeluaran dalam bulan yang dipilih.</p>
+
+    <div class="card">
+      <label for="monthFilter">Pilih Bulan</label>
+      <input type="month" id="monthFilter" />
+    </div>
+
+    <div class="summary">
+      <div class="summary-box"><span>Total Pemasukan</span><strong class="income" id="totalIncome">Rp0</strong></div>
+      <div class="summary-box"><span>Total Pengeluaran</span><strong class="expense" id="totalExpense">Rp0</strong></div>
+      <div class="summary-box"><span>Sisa Saldo</span><strong class="balance" id="balance">Rp0</strong></div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h2>Tambah Data</h2>
+        <form id="financeForm">
+          <label for="date">Tanggal</label>
+          <input type="date" id="date" required />
+          <label for="type">Jenis</label>
+          <select id="type" required>
+            <option value="income">Pemasukan</option>
+            <option value="expense">Pengeluaran</option>
+          </select>
+          <label for="category">Kategori</label>
+          <select id="category" required></select>
+          <label for="amount">Nominal</label>
+          <input type="number" id="amount" placeholder="Contoh: 50000" min="1" required />
+          <label for="note">Catatan</label>
+          <input type="text" id="note" placeholder="Contoh: makan siang, gaji, bensin" />
+          <button type="submit">Simpan</button>
+        </form>
+      </div>
+
+      <div class="card chart-wrap">
+        <h2>Diagram Pengeluaran</h2>
+        <canvas id="expenseChart"></canvas>
+      </div>
+
+      <div class="card full">
+        <h2>Riwayat Bulan Ini</h2>
+        <button class="danger" onclick="clearCurrentMonthData()">Hapus Data Bulan Ini</button>
+        <table>
+          <thead>
+            <tr><th>Tanggal</th><th>Jenis</th><th>Kategori</th><th>Nominal</th><th>Catatan</th><th>Aksi</th></tr>
+          </thead>
+          <tbody id="transactionTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const incomeCategories = ["Gaji", "Bonus", "Freelance", "Investasi", "Lainnya"];
+    const expenseCategories = ["Makan", "Transport", "Belanja", "Tagihan", "Hiburan", "Kesehatan", "Pendidikan", "Lainnya"];
+    const form = document.getElementById("financeForm");
+    const dateInput = document.getElementById("date");
+    const typeInput = document.getElementById("type");
+    const categoryInput = document.getElementById("category");
+    const amountInput = document.getElementById("amount");
+    const noteInput = document.getElementById("note");
+    const monthFilter = document.getElementById("monthFilter");
+    const transactionTable = document.getElementById("transactionTable");
+    let transactions = JSON.parse(localStorage.getItem("transactions")) || [];
+    let chart;
+
+    function formatRupiah(number) {
+      return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(number);
+    }
+    function getTodayDate() { return new Date().toISOString().split("T")[0]; }
+    function getCurrentMonth() { return new Date().toISOString().slice(0, 7); }
+    function updateCategoryOptions() {
+      const categories = typeInput.value === "income" ? incomeCategories : expenseCategories;
+      categoryInput.innerHTML = "";
+      categories.forEach(category => {
+        const option = document.createElement("option");
+        option.value = category;
+        option.textContent = category;
+        categoryInput.appendChild(option);
+      });
+    }
+    function saveTransactions() { localStorage.setItem("transactions", JSON.stringify(transactions)); }
+    function getFilteredTransactions() { return transactions.filter(item => item.date.startsWith(monthFilter.value)); }
+    function render() {
+      const filtered = getFilteredTransactions();
+      const totalIncome = filtered.filter(item => item.type === "income").reduce((sum, item) => sum + item.amount, 0);
+      const totalExpense = filtered.filter(item => item.type === "expense").reduce((sum, item) => sum + item.amount, 0);
+      document.getElementById("totalIncome").textContent = formatRupiah(totalIncome);
+      document.getElementById("totalExpense").textContent = formatRupiah(totalExpense);
+      document.getElementById("balance").textContent = formatRupiah(totalIncome - totalExpense);
+      transactionTable.innerHTML = "";
+      if (filtered.length === 0) {
+        transactionTable.innerHTML = '<tr><td colspan="6">Belum ada data untuk bulan ini.</td></tr>';
+      } else {
+        filtered.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(item => {
+          const row = document.createElement("tr");
+          row.innerHTML = `<td>${item.date}</td><td>${item.type === "income" ? "Pemasukan" : "Pengeluaran"}</td><td>${item.category}</td><td>${formatRupiah(item.amount)}</td><td>${item.note || "-"}</td><td><button class="delete-btn" onclick="deleteTransaction('${item.id}')">Hapus</button></td>`;
+          transactionTable.appendChild(row);
+        });
+      }
+      renderChart(filtered);
+    }
+    function renderChart(filtered) {
+      const expenseData = {};
+      filtered.filter(item => item.type === "expense").forEach(item => {
+        expenseData[item.category] = (expenseData[item.category] || 0) + item.amount;
+      });
+      const labels = Object.keys(expenseData);
+      const data = Object.values(expenseData);
+      if (chart) chart.destroy();
+      chart = new Chart(document.getElementById("expenseChart"), {
+        type: "pie",
+        data: { labels, datasets: [{ data, backgroundColor: ["#ef4444", "#f97316", "#eab308", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899"] }] },
+        options: { responsive: true, plugins: { tooltip: { callbacks: { label: function(context) { const total = data.reduce((sum, value) => sum + value, 0); const value = context.raw; const percent = total ? ((value / total) * 100).toFixed(1) : 0; return `${context.label}: ${formatRupiah(value)} (${percent}%)`; } } }, legend: { position: "bottom" } } }
+      });
+    }
+    function deleteTransaction(id) { transactions = transactions.filter(item => item.id !== id); saveTransactions(); render(); }
+    function clearCurrentMonthData() {
+      const selectedMonth = monthFilter.value;
+      if (!confirm(`Yakin hapus semua data bulan ${selectedMonth}?`)) return;
+      transactions = transactions.filter(item => !item.date.startsWith(selectedMonth));
+      saveTransactions();
+      render();
+    }
+    form.addEventListener("submit", function(event) {
+      event.preventDefault();
+      transactions.push({ id: crypto.randomUUID(), date: dateInput.value, type: typeInput.value, category: categoryInput.value, amount: Number(amountInput.value), note: noteInput.value.trim() });
+      saveTransactions();
+      form.reset();
+      dateInput.value = getTodayDate();
+      typeInput.value = "income";
+      updateCategoryOptions();
+      render();
+    });
+    typeInput.addEventListener("change", updateCategoryOptions);
+    monthFilter.addEventListener("change", render);
+    dateInput.value = getTodayDate();
+    monthFilter.value = getCurrentMonth();
+    updateCategoryOptions();
+    render();
+  </script>
+</body>
+</html>
